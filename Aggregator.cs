@@ -8,14 +8,18 @@ namespace BabyNI
 {
     public class Aggregator
     {
+        private AppSettings _appSettings;
         public Aggregator()
         {
             Aggregate(); 
         }
 
-        public void Aggregate() { 
-            dbConnection _conn = new();
-            using (VerticaConnection connection = new(_conn.ConnectionString()))
+        public void Aggregate() {
+
+            _appSettings = LoadAppSettings();
+
+           
+            using (VerticaConnection connection = new(_appSettings.VerticaConnectionString))
             {
 
                 connection.Open();
@@ -86,8 +90,8 @@ namespace BabyNI
 
         private void Update(DateTime Datetime_key)
         {
-            dbConnection _conn = new dbConnection();
-            VerticaConnection conn = new VerticaConnection(_conn.ConnectionString());
+        
+            VerticaConnection conn = new VerticaConnection(_appSettings.VerticaConnectionString);
 
             conn.Open();
 
@@ -102,8 +106,8 @@ namespace BabyNI
 
         private DateTime GETDate()
         {
-            dbConnection _conn = new dbConnection();
-            VerticaConnection connect = new VerticaConnection(_conn.ConnectionString());
+         
+            VerticaConnection connect = new VerticaConnection(_appSettings.VerticaConnectionString);
 
             try
             {
@@ -149,7 +153,20 @@ namespace BabyNI
         connect.Close();
     }
 }
+        private AppSettings LoadAppSettings()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            var appSettings = new AppSettings();
+            configuration.GetSection("AppSettings").Bind(appSettings);
+
+            return appSettings;
         }
+    }
+
             }
            
         

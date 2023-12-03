@@ -7,8 +7,8 @@ namespace BabyNI
  
      public class Loader
     {
-            private readonly string sourceFolderPath = "C:\\Users\\User\\Desktop\\babyNI\\ToBeLoaded";
-            private readonly string finishedPath = "C:\\Users\\User\\Desktop\\babyNI\\LoadedData";
+        private AppSettings _appSettings;
+
 
             public Loader()
             {
@@ -16,8 +16,10 @@ namespace BabyNI
             }
 
         public void Load()
+
         {
-            foreach (string filePath in Directory.GetFiles(sourceFolderPath, "*.csv"))
+            _appSettings = new AppSettings();
+            foreach (string filePath in Directory.GetFiles(_appSettings.LoadsourceFolderPath, "*.csv"))
             {
                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
                 string fileName = Path.GetFileName(filePath);
@@ -29,8 +31,8 @@ namespace BabyNI
                 else {
                    try
                     {
-                        dbConnection _conn = new();
-                        using (VerticaConnection conn = new VerticaConnection(_conn.ConnectionString()))
+                       
+                        using (VerticaConnection conn = new VerticaConnection(_appSettings.VerticaConnectionString))
                         {
 
 
@@ -51,7 +53,7 @@ namespace BabyNI
 
                             VerticaCommand cmd = new VerticaCommand(copySql, conn);
                             cmd.ExecuteNonQuery();
-conn.Close();
+                            conn.Close();
 
                            
                         } 
@@ -63,8 +65,8 @@ conn.Close();
                     }
                     catch (Exception ex)
                     {
-                        dbConnection _conn = new();
-                        using (VerticaConnection connection = new(_conn.ConnectionString()))
+    
+                        using (VerticaConnection connection = new(_appSettings.VerticaConnectionString))
                         {
 
                             connection.Open();
@@ -81,7 +83,7 @@ conn.Close();
                         insertAgg(getDate(fileNameWithoutExtension));
                     }
  Update(fileNameWithoutExtension);
-                    File.Move(filePath, Path.Combine(finishedPath, fileName));
+                    File.Move(filePath, Path.Combine(_appSettings.LoadedFolderPath, fileName));
                     
                 }
             }Aggregator aggregator = new Aggregator();
@@ -90,9 +92,9 @@ conn.Close();
         }
         private bool isFileLoaded(string fileNameWithoutExtension)
         {
-            dbConnection _conn = new dbConnection();
 
-            using (VerticaConnection connect = new VerticaConnection(_conn.ConnectionString()))
+
+            using (VerticaConnection connect = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
                 connect.Open();
 
@@ -116,8 +118,8 @@ conn.Close();
 
         private void Update(string fileNameWithoutExtension)
         {
-            dbConnection _conn = new dbConnection();
-            using (VerticaConnection connection = new VerticaConnection(_conn.ConnectionString()))
+
+            using (VerticaConnection connection = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
 
                 connection.Open();
@@ -138,10 +140,9 @@ conn.Close();
 
         private void insertAgg(DateTime datetime_key)
         {
-            using (VerticaConnection connection = new VerticaConnection())
+            using (VerticaConnection connection = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
-                dbConnection _conn = new dbConnection();
-                connection.ConnectionString = _conn.ConnectionString();
+                
 
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
@@ -155,9 +156,9 @@ conn.Close();
 
         private bool IsFileAgg(DateTime datetime_key)
         {
-            dbConnection _conn = new dbConnection();
 
-            using (VerticaConnection connect = new VerticaConnection(_conn.ConnectionString()))
+
+            using (VerticaConnection connect = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
                 connect.Open();
 

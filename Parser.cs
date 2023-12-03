@@ -17,18 +17,15 @@ namespace BabyNI
     public class Parser
     {
 
-
+        private  AppSettings _appSettings;
         public void ParseTxtToCsv()
+
         {
-            Console.WriteLine("this is a test");
-            string destinationFolderPath = @"C:\Users\User\Desktop\babyNI\ToBeLoaded";
-
-            string sourceFolderPath = "C:\\Users\\User\\Desktop\\babyNI\\ToBeParsed";
-
-            string archive = "C:\\Users\\User\\Desktop\\babyNI\\ParsedData";
+            _appSettings = LoadAppSettings();
+          
             // Define the output CSV file path
 
-            foreach (string filePath in Directory.GetFiles(sourceFolderPath, "*.txt"))
+            foreach (string filePath in Directory.GetFiles(_appSettings.sourceFolderPath, "*.txt"))
             {
 
                 Console.WriteLine($"Processing file: {filePath}");
@@ -39,7 +36,7 @@ namespace BabyNI
 
                 Dictionary<string, int> headers = new Dictionary<string, int>();
 
-                string outputCsvFilePath = Path.Combine(destinationFolderPath, Path.GetFileNameWithoutExtension(filePath) + ".csv");
+                string outputCsvFilePath = Path.Combine(_appSettings.destinationFolderPath, Path.GetFileNameWithoutExtension(filePath) + ".csv");
 
 
 
@@ -195,8 +192,8 @@ namespace BabyNI
 
 
 
-                            dbConnection _conn = new dbConnection();
-                            using (VerticaConnection conn = new VerticaConnection(_conn.ConnectionString()))
+                          
+                            using (VerticaConnection conn = new VerticaConnection(_appSettings.VerticaConnectionString))
                             {
                                 string CfileName = fileName.Replace('_', ' ');
 
@@ -253,7 +250,7 @@ namespace BabyNI
 
                             Update(fileNameWithoutExtension, getDate(Path.GetFileNameWithoutExtension(filePath)));
                             Console.WriteLine($"Processed file: {filePath}"); // Debug statement
-                            File.Move(filePath, archive); 
+                            File.Move(filePath, _appSettings.archive); 
                         }
 
 
@@ -348,8 +345,8 @@ namespace BabyNI
 
 
 
-                            dbConnection _conn = new dbConnection();
-                            using (VerticaConnection conn = new VerticaConnection(_conn.ConnectionString()))
+                          
+                            using (VerticaConnection conn = new VerticaConnection(_appSettings.VerticaConnectionString))
                             {
                                 string CfileName = fileName.Replace('_', ' ');
 
@@ -405,11 +402,10 @@ namespace BabyNI
                             Update(fileNameWithoutExtension, getDate(Path.GetFileNameWithoutExtension(filePath)));
 
                            Console.WriteLine($"Processed file: {filePath}"); // Debug statement
-                            Loader loader = new Loader();
-                            loader.Load();
+                            
 
 
-                            File.Move(filePath,archive);
+                            File.Move(filePath,_appSettings.archive);
                                 }
 
 
@@ -419,8 +415,8 @@ namespace BabyNI
 
                     catch (Exception ex)
                     {
-                        dbConnection _conn = new();
-                        using (VerticaConnection connection = new(_conn.ConnectionString()))
+                        
+                        using (VerticaConnection connection = new(_appSettings.VerticaConnectionString))
                         {
 
                             connection.Open();
@@ -432,12 +428,24 @@ namespace BabyNI
                             connection.Close();
                         }
                     }
-                    File.Move(filePath, Path.Combine(@"C:\Users\User\Desktop\babyNI\ParsedData", fileName));
+                    File.Move(filePath, Path.Combine(_appSettings.parsedData, fileName));
                     Console.WriteLine("Finished ParseTxtToCsv"); // Debug statement
                 }
                 Loader loader = new Loader();
                 loader.Load();
             }
+        }
+        private AppSettings LoadAppSettings()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            var appSettings = new AppSettings();
+            configuration.GetSection("AppSettings").Bind(appSettings);
+
+            return appSettings;
         }
         private static DateTime getDate(string fileName)
         {
@@ -480,9 +488,9 @@ namespace BabyNI
 
         private bool IsFileParsed(string fileNameWithoutExtension)
         {
-            dbConnection _conn = new dbConnection();
+          
 
-            using (VerticaConnection connect = new VerticaConnection(_conn.ConnectionString()))
+            using (VerticaConnection connect = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
                 connect.Open();
 
@@ -585,8 +593,7 @@ namespace BabyNI
 
         private void Update(string fileNameWithoutExtension, DateTime DATETIME_KEY) {
 
-            dbConnection _conn = new dbConnection();
-            using (VerticaConnection con = new VerticaConnection(_conn.ConnectionString()))
+            using (VerticaConnection con = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
 
                 con.Open();

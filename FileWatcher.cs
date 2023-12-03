@@ -92,9 +92,9 @@ namespace BabyNI
         }
         private bool IsFileParsed(string fileNameWithoutExtension)
         {
-            dbConnection _conn = new dbConnection();
+          
 
-            using (VerticaConnection connect = new VerticaConnection(_conn.ConnectionString()))
+            using (VerticaConnection connect = new VerticaConnection(_appSettings.VerticaConnectionString))
             {
                 connect.Open();
 
