@@ -19,6 +19,8 @@ namespace BabyNI
 
         {
             _appSettings = new AppSettings();
+            _appSettings = LoadAppSettings();
+
             foreach (string filePath in Directory.GetFiles(_appSettings.LoadsourceFolderPath, "*.csv"))
             {
                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
@@ -82,13 +84,26 @@ namespace BabyNI
                     {
                         insertAgg(getDate(fileNameWithoutExtension));
                     }
- Update(fileNameWithoutExtension);
+                    Update(fileNameWithoutExtension);
                     File.Move(filePath, Path.Combine(_appSettings.LoadedFolderPath, fileName));
                     
                 }
             }Aggregator aggregator = new Aggregator();
                     aggregator.Aggregate();
                    
+        }
+
+        private AppSettings LoadAppSettings()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            var appSettings = new AppSettings();
+            configuration.GetSection("AppSettings").Bind(appSettings);
+
+            return appSettings;
         }
         private bool isFileLoaded(string fileNameWithoutExtension)
         {

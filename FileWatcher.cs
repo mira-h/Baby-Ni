@@ -36,8 +36,7 @@ namespace BabyNI
             watcher.EnableRaisingEvents = true;
 
             Console.WriteLine("Press enter to exit.");
-            Parser parserTrial = new();
-            parserTrial.ParseTxtToCsv();  
+
             Console.ReadLine();
         }
 
@@ -58,6 +57,7 @@ namespace BabyNI
             else
             {
                 Console.WriteLine($"{fileNameWithoutExtension} is not parsed. Continuing...");
+              
                 using (VerticaConnection connection = new VerticaConnection(_appSettings.VerticaConnectionString))
                 {
                   
@@ -70,10 +70,15 @@ namespace BabyNI
                     }
                     connection.Close();
                 }
+
+               
                 string fileName = Path.GetFileName(e.FullPath);
 
 
                 File.Move(e.FullPath, Path.Combine(_appSettings.ToBeParsedFolderPath, fileName));
+                //edited
+                Parser parserTrial = new();
+                parserTrial.ParseTxtToCsv();
             }
 
             Console.WriteLine($"File Detected: {e.FullPath}");

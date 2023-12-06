@@ -144,9 +144,9 @@ namespace BabyNI
                     }
                 }
             }
-
+            return DateTime.Now;
             // If no rows are found, you might want to handle this case (throw an exception or return a default DateTime value)
-            throw new InvalidOperationException("No rows found in the result set.");
+           // throw new InvalidOperationException("No rows found in the result set.");
         }
     finally
     {
